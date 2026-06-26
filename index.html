@@ -340,6 +340,76 @@
       cursor: pointer;
     }
 
+    /* ── STORY SELECT ──────────────────────────── */
+    #sel {
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      background: linear-gradient(140deg, #FFB6C1 0%, #DDA0DD 45%, #A8C0D8 100%);
+      padding: 28px 24px;
+      overflow: hidden;
+    }
+    .sel-heading {
+      font-size: 1.35rem; color: white;
+      text-shadow: 0 2px 10px rgba(140,50,80,.4);
+      margin-bottom: 6px;
+    }
+    .sel-sub {
+      font-size: .9rem; color: rgba(255,255,255,.8);
+      font-style: italic; margin-bottom: 26px;
+    }
+    .sel-cards { display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; }
+    .sel-card {
+      background: rgba(255,255,255,.72);
+      backdrop-filter: blur(12px);
+      border-radius: 20px;
+      padding: 28px 22px 22px;
+      width: 195px;
+      border: 2px solid transparent;
+      transition: transform .2s, box-shadow .2s, border-color .2s;
+      text-align: center;
+      cursor: pointer;
+    }
+    .sel-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 14px 38px rgba(170,70,130,.25);
+      border-color: rgba(200,120,170,.4);
+    }
+    .sc-icon  { font-size: 2.6rem; margin-bottom: 10px; }
+    .sc-title { font-size: 1.05rem; font-weight: bold; color: #5a1a68; margin-bottom: 5px; }
+    .sc-blurb { font-size: .83rem; color: #8848a0; font-style: italic; margin-bottom: 12px; line-height: 1.55; min-height: 50px; }
+    .sc-time {
+      font-size: .76rem; letter-spacing: .5px;
+      background: linear-gradient(90deg,#FFB6C1,#DDA0DD);
+      color: white; padding: 3px 13px;
+      border-radius: 20px; display: inline-block;
+      margin-bottom: 14px;
+    }
+    .sc-btn {
+      background: linear-gradient(135deg,#DDA0DD,#B870C0);
+      color: white; border: none;
+      padding: 10px 0; border-radius: 22px;
+      font-family: 'Georgia', serif; font-size: .9rem;
+      cursor: pointer; width: 100%;
+      transition: opacity .2s;
+    }
+    .sc-btn:hover { opacity: .85; }
+    .sc-btn:disabled {
+      background: linear-gradient(135deg,#d0c0d8,#b8a8c8);
+      cursor: default; opacity: .75;
+    }
+    .sel-back {
+      position: absolute; top: 14px; left: 16px;
+      background: rgba(255,255,255,.38);
+      border: 1px solid rgba(255,255,255,.5);
+      color: white; padding: 5px 14px;
+      border-radius: 14px; font-size: .76rem;
+      cursor: pointer; backdrop-filter: blur(4px);
+      transition: background .2s;
+    }
+    .sel-back:hover { background: rgba(255,255,255,.55); }
+
     /* ── RESPONSIVE ────────────────────────────── */
     @media (max-width: 820px) {
       #game {
@@ -357,6 +427,9 @@
       #dbox { height: 215px; }
       #tap-overlay { bottom: 215px; }
       #dtxt { font-size: 1.05rem; }
+      .sel-cards { flex-direction: column; align-items: center; gap: 14px; }
+      .sel-card { width: 280px; padding: 22px 20px 18px; }
+      .sc-blurb { min-height: unset; }
     }
 
     /* very small phones */
@@ -386,7 +459,30 @@
     <p class="t-main">Happy Birthday,</p>
     <p class="t-name">Mariam 🌸</p>
     <p class="t-sub">A story of your special day,<br>seen through two hearts</p>
-    <button class="btn" onclick="G.start()">Begin the Story ✨</button>
+    <button class="btn" onclick="G.goSelect()">Begin the Story ✨</button>
+  </div>
+
+  <!-- ══ STORY SELECT ════════════════════════════ -->
+  <div id="sel" class="screen">
+    <button class="sel-back" onclick="G.backToTitle()">← Back</button>
+    <p class="sel-heading">Choose your story</p>
+    <p class="sel-sub">How deep do you want to go? 🌸</p>
+    <div class="sel-cards">
+      <div class="sel-card" onclick="G.pickStory('short')">
+        <div class="sc-icon">📖</div>
+        <div class="sc-title">Short Story</div>
+        <div class="sc-blurb">A sweet glimpse of your special day, seen through two hearts.</div>
+        <div class="sc-time">⏱ ~ 4 min</div><br>
+        <button class="sc-btn">Begin ✨</button>
+      </div>
+      <div class="sel-card" onclick="G.pickStory('long')">
+        <div class="sc-icon">📚</div>
+        <div class="sc-title">Full Story</div>
+        <div class="sc-blurb">The complete adventure — every chapter, every moment.</div>
+        <div class="sc-time">⏱ ~ 15 min</div><br>
+        <button class="sc-btn">Begin ✨</button>
+      </div>
+    </div>
   </div>
 
   <!-- ══ GAME ════════════════════════════════════ -->
@@ -440,9 +536,9 @@
 
 <script>
 // ═══════════════════════════════════════════════════════════
-//  STORY
+//  STORIES
 // ═══════════════════════════════════════════════════════════
-const STORY = [
+const SHORT_STORY = [
   // ── ACT 1 : HER MORNING ────────────────────────────────
   { pov:'her', bg:'bg-bedroom', ch:'😴', spk:'Narrator', lines:[
     'The morning light crept through soft curtains, painting the room in the gentlest shade of rose...',
@@ -554,15 +650,23 @@ const STORY = [
   { pov:'ending' },
 ];
 
+// ── Long story — to be filled in ─────────────────────────
+const LONG_STORY = [
+  // scenes will go here
+  { pov:'ending' },
+];
+
 // ═══════════════════════════════════════════════════════════
 //  ENGINE
 // ═══════════════════════════════════════════════════════════
 const G = (() => {
   let si = 0, li = 0, typing = false, timer = null;
+  let activeStory = SHORT_STORY;
 
   const el = id => document.getElementById(id);
   const SCR = {
     title:    el('title'),
+    sel:      el('sel'),
     gs:       el('gs'),
     swscreen: el('swscreen'),
     ending:   el('ending'),
@@ -588,8 +692,8 @@ const G = (() => {
   }
 
   function dots(idx) {
-    const real = STORY.filter(s => s.pov !== 'switch' && s.pov !== 'ending');
-    const done = STORY.slice(0, idx + 1).filter(s => s.pov !== 'switch' && s.pov !== 'ending').length;
+    const real = activeStory.filter(s => s.pov !== 'switch' && s.pov !== 'ending');
+    const done = activeStory.slice(0, idx + 1).filter(s => s.pov !== 'switch' && s.pov !== 'ending').length;
     const prog = Math.ceil((done / real.length) * 4);
     for (let i = 0; i < 4; i++) {
       const d = el('d' + i);
@@ -626,7 +730,7 @@ const G = (() => {
 
   // ── render ───────────────────────────────────────────
   function render(idx) {
-    const s = STORY[idx];
+    const s = activeStory[idx];
     if (!s) { fade(ending); return; }
     if (s.pov === 'switch') { fade(() => doSwitch(s)); return; }
     if (s.pov === 'ending') { fade(ending);            return; }
@@ -645,12 +749,12 @@ const G = (() => {
   function tap() {
     if (typing) {
       clearTimeout(timer);
-      dtxtEl.textContent = STORY[si].lines[li];
+      dtxtEl.textContent = activeStory[si].lines[li];
       typing = false;
       return;
     }
     li++;
-    const s = STORY[si];
+    const s = activeStory[si];
     if (li < s.lines.length) {
       typewrite(s.lines[li]);
     } else {
@@ -702,16 +806,27 @@ const G = (() => {
   function skipToEnd() {
     clearTimeout(timer);
     typing = false;
-    si = STORY.length - 1;
+    si = activeStory.length - 1;
     fade(ending);
   }
 
-  // ── init ──────────────────────────────────────────────
-  function start() {
+  // ── navigation ────────────────────────────────────────
+  function goSelect() {
+    fade(() => show('sel'));
+  }
+
+  function backToTitle() {
+    fade(() => show('title'));
+  }
+
+  function pickStory(type) {
+    activeStory = type === 'long' ? LONG_STORY : SHORT_STORY;
+    si = 0; li = 0; typing = false;
+    clearTimeout(timer);
     fade(() => { show('gs'); render(0); });
   }
 
-  return { start, tap, swContinue, skipToEnd };
+  return { goSelect, backToTitle, pickStory, tap, swContinue, skipToEnd };
 })();
 </script>
 </body>
