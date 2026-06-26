@@ -340,6 +340,49 @@
       cursor: pointer;
     }
 
+    /* ── UNDER DEVELOPMENT ─────────────────────── */
+    #underdev {
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      background: linear-gradient(140deg, #FFB6C1 0%, #DDA0DD 45%, #A8C0D8 100%);
+    }
+    .ud-content {
+      padding: 40px 36px;
+      background: rgba(255,255,255,.65);
+      backdrop-filter: blur(14px);
+      border-radius: 22px;
+      border: 1px solid rgba(255,255,255,.6);
+      max-width: 340px;
+    }
+    .ud-icon  { font-size: 3.2rem; margin-bottom: 14px; animation: udBob 2s ease-in-out infinite; }
+    @keyframes udBob {
+      0%,100% { transform: translateY(0); }
+      50%      { transform: translateY(-8px); }
+    }
+    .ud-title {
+      font-size: 1.5rem; color: #5a1a68;
+      margin-bottom: 14px;
+    }
+    .ud-msg {
+      font-size: .97rem; color: #7a4090;
+      font-style: italic; line-height: 1.75;
+      margin-bottom: 24px;
+    }
+    .ud-dots { display: flex; gap: 8px; justify-content: center; }
+    .ud-dots span {
+      width: 9px; height: 9px; border-radius: 50%;
+      background: linear-gradient(135deg, #FFB6C1, #DDA0DD);
+      animation: udPulse 1.4s ease-in-out infinite;
+    }
+    .ud-dots span:nth-child(2) { animation-delay: .2s; }
+    .ud-dots span:nth-child(3) { animation-delay: .4s; }
+    @keyframes udPulse {
+      0%,100% { transform: scale(1);   opacity: .5; }
+      50%      { transform: scale(1.4); opacity: 1;  }
+    }
+
     /* ── PHOTO SCENE ───────────────────────────── */
     #scenebg.bg-photo {
       background-size: cover;
@@ -493,12 +536,25 @@
         <div class="sc-time">⏱ ~ 4 min</div><br>
         <button class="sc-btn">Begin ✨</button>
       </div>
-      <div class="sel-card" onclick="G.pickStory('long')">
+      <div class="sel-card" onclick="G.showUnderDev()">
         <div class="sc-icon">📚</div>
         <div class="sc-title">Full Story</div>
         <div class="sc-blurb">The complete adventure — every chapter, every moment.</div>
         <div class="sc-time">⏱ ~ 15 min</div><br>
         <button class="sc-btn">Begin ✨</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ UNDER DEVELOPMENT ══════════════════════ -->
+  <div id="underdev" class="screen">
+    <button class="sel-back" onclick="G.backToSelect()">← Back</button>
+    <div class="ud-content">
+      <div class="ud-icon">🚧</div>
+      <h2 class="ud-title">Under Development</h2>
+      <p class="ud-msg">Something bigger is being written for you.<br>Check back soon — it's going to be worth the wait. 💕</p>
+      <div class="ud-dots">
+        <span></span><span></span><span></span>
       </div>
     </div>
   </div>
@@ -688,6 +744,7 @@ const G = (() => {
     gs:       el('gs'),
     swscreen: el('swscreen'),
     ending:   el('ending'),
+    underdev: el('underdev'),
   };
   const fadeEl   = el('fadelay');
   const scenebg  = el('scenebg');
@@ -845,6 +902,14 @@ const G = (() => {
     fade(() => show('title'));
   }
 
+  function backToSelect() {
+    fade(() => show('sel'));
+  }
+
+  function showUnderDev() {
+    fade(() => show('underdev'));
+  }
+
   function pickStory(type) {
     activeStory = type === 'long' ? LONG_STORY : SHORT_STORY;
     si = 0; li = 0; typing = false;
@@ -852,7 +917,7 @@ const G = (() => {
     fade(() => { show('gs'); render(0); });
   }
 
-  return { goSelect, backToTitle, pickStory, tap, swContinue, skipToEnd };
+  return { goSelect, backToTitle, backToSelect, showUnderDev, pickStory, tap, swContinue, skipToEnd };
 })();
 </script>
 </body>
