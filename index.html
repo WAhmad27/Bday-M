@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#FFB6C1">
+  <title>Happy Birthday, Mariam 🌸</title>
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: #150a1a;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      min-height: 100dvh;
+      overflow: hidden;
+      font-family: 'Georgia', serif;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    #game {
+      width: 800px;
+      height: 560px;
+      position: relative;
+      border-radius: 22px;
+      overflow: hidden;
+      box-shadow: 0 30px 80px rgba(0,0,0,0.65), 0 0 0 1px rgba(255,200,220,0.15);
+    }
+
+    /* ── SCREENS ─────────────────────────────────── */
+    .screen {
+      display: none;
+      position: absolute;
+      inset: 0;
+    }
+
+    /* ── TITLE ──────────────────────────────────── */
+    #title {
+      display: flex;          /* visible on load */
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      background: linear-gradient(140deg, #FFB6C1 0%, #DDA0DD 45%, #A8C0D8 100%);
+      overflow: hidden;
+    }
+
+    .fdeco {
+      position: absolute;
+      font-size: 1.9rem;
+      opacity: 0.5;
+      animation: flt var(--d,5s) ease-in-out infinite var(--del,0s);
+      pointer-events: none;
+    }
+    @keyframes flt {
+      0%,100% { transform: translateY(0) rotate(0deg); }
+      50%      { transform: translateY(-18px) rotate(7deg); }
+    }
+
+    .t-main { font-size: 2.4rem; color: white; text-shadow: 0 2px 14px rgba(140,50,80,.45); line-height: 1.2; }
+    .t-name { font-size: 4rem;   color: white; text-shadow: 0 2px 20px rgba(140,50,80,.5); margin-bottom: .7rem; }
+    .t-sub  { font-size: 1rem;   color: rgba(255,255,255,.82); font-style: italic; margin-bottom: 2rem; line-height: 1.6; }
+
+    .btn {
+      background: white;
+      border: none;
+      padding: 12px 40px;
+      border-radius: 50px;
+      font-size: 1rem;
+      font-family: 'Georgia', serif;
+      color: #a85070;
+      cursor: pointer;
+      box-shadow: 0 5px 24px rgba(170,60,100,.3);
+      letter-spacing: 1px;
+      transition: transform .2s, box-shadow .2s;
+    }
+    .btn:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(170,60,100,.4); }
+
+    /* ── GAME ───────────────────────────────────── */
+    #gs { /* game screen — children are all absolute */ }
+
+    #scenebg {
+      position: absolute;
+      inset: 0;
+      transition: background 1.1s ease;
+    }
+
+    /* scene backgrounds */
+    .bg-bedroom { background: linear-gradient(155deg, #FFE6E8 0%, #FFCCD8 45%, #F5B8CC 100%); }
+    .bg-hospital { background: linear-gradient(175deg, #E4F4EF 0%, #CCE8E0 50%, #B8D8D0 100%); }
+    .bg-home     { background: linear-gradient(140deg, #EED4FF 0%, #FFD2EA 55%, #FFEBD4 100%); }
+    .bg-evening  { background: linear-gradient(175deg, #FFBBCE 0%, #CC98D4 40%, #9060B0 100%); }
+
+    /* scene props via pseudo */
+    .bg-bedroom::before {
+      content: '';
+      position: absolute;
+      top: 28px; right: 95px;
+      width: 80px; height: 100px;
+      background: rgba(255,220,180,.32);
+      border: 2px solid rgba(255,200,160,.45);
+      border-radius: 5px 5px 0 0;
+      box-shadow: 0 0 35px rgba(255,200,100,.25);
+    }
+    .bg-bedroom::after {
+      content: '✿';
+      position: absolute;
+      bottom: 200px; left: 60px;
+      font-size: 3.5rem;
+      color: rgba(255,160,180,.25);
+    }
+    .bg-hospital::before {
+      content: '+';
+      position: absolute;
+      top: 22px; right: 70px;
+      font-size: 5.5rem; font-weight: 900; line-height: 1;
+      color: rgba(100,180,150,.22);
+    }
+    .bg-hospital::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, transparent, rgba(100,180,155,.4), transparent);
+    }
+    .bg-home::before {
+      content: '✦';
+      position: absolute;
+      top: 18px; left: 65px;
+      font-size: 4rem;
+      color: rgba(180,130,220,.22);
+    }
+    .bg-evening::before {
+      content: '✨';
+      position: absolute;
+      top: 16px; right: 55px;
+      font-size: 2.8rem; opacity: .38;
+    }
+    .bg-evening::after {
+      content: '🌙';
+      position: absolute;
+      top: 18px; left: 65px;
+      font-size: 2.2rem; opacity: .35;
+    }
+
+    /* POV TAG */
+    #povtag {
+      position: absolute;
+      top: 15px; left: 50%;
+      transform: translateX(-50%);
+      padding: 5px 18px;
+      border-radius: 20px;
+      font-size: .77rem; font-weight: bold;
+      letter-spacing: 2px; text-transform: uppercase;
+      white-space: nowrap; z-index: 10;
+      transition: background .5s, color .5s;
+    }
+    .tag-her  { background: rgba(255,182,193,.88); color: #722040; }
+    .tag-his  { background: rgba(176,196,222,.88); color: #183458; }
+    .tag-both { background: rgba(221,160,221,.88); color: #521878; }
+
+    /* PROGRESS DOTS */
+    #dots {
+      position: absolute;
+      top: 17px; right: 18px;
+      display: flex; gap: 5px; z-index: 10;
+    }
+    .dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: rgba(255,255,255,.3);
+      transition: background .4s;
+    }
+    .dot.lit { background: rgba(255,255,255,.9); }
+
+    /* CHARACTER */
+    #char {
+      position: absolute;
+      left: 50%; bottom: 200px;
+      transform: translateX(-50%);
+      font-size: 8rem; line-height: 1;
+      filter: drop-shadow(0 6px 14px rgba(0,0,0,.14));
+      animation: bth 3.5s ease-in-out infinite;
+      transition: opacity .4s, font-size .3s;
+      user-select: none;
+    }
+    @keyframes bth {
+      0%,100% { transform: translateX(-50%) scale(1)      translateY(0);   }
+      50%      { transform: translateX(-50%) scale(1.038) translateY(-5px); }
+    }
+
+    /* DIALOGUE BOX */
+    #dbox {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 200px;
+      background: rgba(255,255,255,.93);
+      backdrop-filter: blur(14px);
+      border-top: 2px solid rgba(255,182,193,.3);
+      padding: 15px 28px 12px;
+      cursor: pointer;
+      display: flex; flex-direction: column;
+      user-select: none;
+    }
+    #spk {
+      display: inline-block; align-self: flex-start;
+      padding: 3px 14px;
+      border-radius: 14px;
+      font-size: .86rem; font-weight: bold; letter-spacing: .5px;
+      margin-bottom: 9px;
+      color: white;
+      transition: background .4s;
+    }
+    .sk-her  { background: linear-gradient(90deg,#FFB6C1,#DDA0DD); }
+    .sk-his  { background: linear-gradient(90deg,#B0C4DE,#8060AB); }
+    .sk-narr { background: linear-gradient(90deg,#C8A0D8,#9880B0); }
+    .sk-npc  { background: linear-gradient(90deg,#C8D8B0,#90A870); }
+
+    #dtxt {
+      font-size: 1.02rem; color: #383838;
+      line-height: 1.74; font-family: 'Georgia', serif;
+      flex: 1;
+    }
+    #caret {
+      text-align: right; color: #DDA0DD; font-size: 1rem;
+      animation: blk 1.15s ease-in-out infinite;
+    }
+    @keyframes blk { 0%,100%{opacity:1} 50%{opacity:.15} }
+
+    /* SKIP BUTTON */
+    #skipbtn {
+      position: absolute;
+      top: 14px; left: 16px;
+      padding: 4px 12px;
+      background: rgba(255,255,255,.4);
+      border: 1px solid rgba(200,150,190,.4);
+      border-radius: 14px;
+      font-size: .72rem; color: #8a4a6a;
+      cursor: pointer; z-index: 10;
+      letter-spacing: .5px;
+      backdrop-filter: blur(4px);
+      transition: background .2s;
+    }
+    #skipbtn:hover { background: rgba(255,255,255,.7); }
+
+    /* ── POV SWITCH ─────────────────────────────── */
+    #swscreen {
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+    .sw-box {
+      padding: 46px 58px;
+      border-radius: 18px;
+      background: rgba(255,255,255,.52);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(200,160,220,.3);
+      animation: popIn .5s ease;
+    }
+    @keyframes popIn {
+      from { transform: scale(.9); opacity: 0; }
+      to   { transform: scale(1);  opacity: 1; }
+    }
+    .sw-eye   { font-size: .72rem; letter-spacing:4px; text-transform:uppercase; color:#9a68b0; margin-bottom:10px; }
+    .sw-title { font-size: 2rem;   color: #5a2880; margin-bottom: 7px; }
+    .sw-sub   { font-size: .96rem; color: #8850a0; font-style:italic; margin-bottom: 22px; }
+    .btn-sw {
+      background: #9050b0; color: white; border: none;
+      padding: 10px 28px; border-radius: 28px;
+      font-size: .94rem; font-family: 'Georgia', serif;
+      cursor: pointer;
+      transition: background .2s, transform .2s;
+    }
+    .btn-sw:hover { background: #7030a0; transform: translateY(-1px); }
+
+    /* ── ENDING ─────────────────────────────────── */
+    #ending {
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      background: linear-gradient(135deg, #FFB6C1 0%, #DDA0DD 35%, #B8A0D8 65%, #FFB6C1 100%);
+      overflow: hidden;
+    }
+    .end-wrap { z-index: 2; padding: 28px 46px; }
+    .end-icon  { font-size: 3rem; margin-bottom: .4rem; }
+    .end-title {
+      font-size: 2.8rem; color: white;
+      text-shadow: 0 2px 18px rgba(140,50,110,.5);
+      margin-bottom: 1.1rem; line-height: 1.2;
+    }
+    .end-msg {
+      font-size: 1.04rem; color: rgba(255,255,255,.93);
+      line-height: 1.9; font-style: italic;
+      max-width: 480px; margin: 0 auto 1.4rem;
+    }
+    .end-sig  { font-size: 1.2rem; color: white; margin-bottom: 1.6rem; }
+    .btn-replay {
+      background: rgba(255,255,255,.25);
+      border: 2px solid rgba(255,255,255,.6);
+      color: white; font-family: 'Georgia', serif;
+      padding: 9px 26px; border-radius: 28px; font-size: .92rem;
+      cursor: pointer; letter-spacing: .5px;
+      transition: background .2s;
+    }
+    .btn-replay:hover { background: rgba(255,255,255,.4); }
+
+    .floaty {
+      position: absolute;
+      pointer-events: none;
+      font-size: 1.6rem;
+      animation: rise var(--d) ease-in var(--del) forwards;
+    }
+    @keyframes rise {
+      0%   { transform: translateY(0) rotate(0);    opacity: 1; }
+      100% { transform: translateY(-650px) rotate(22deg); opacity: 0; }
+    }
+
+    /* ── FADE OVERLAY ──────────────────────────── */
+    #fadelay {
+      position: absolute; inset: 0;
+      background: black; opacity: 0;
+      pointer-events: none; z-index: 200;
+      transition: opacity .55s ease;
+    }
+    #fadelay.on { opacity: 1; }
+
+    /* full-screen tap area for advancing dialogue */
+    #tap-overlay {
+      position: absolute;
+      inset: 0;
+      bottom: 200px; /* leave dialogue box unobstructed */
+      z-index: 5;
+      cursor: pointer;
+    }
+
+    /* ── RESPONSIVE ────────────────────────────── */
+    @media (max-width: 820px) {
+      #game {
+        width: 100vw; height: 100dvh;
+        border-radius: 0;
+      }
+      #char { font-size: 6rem; bottom: 215px; }
+      .t-name { font-size: 2.9rem; }
+      .t-main { font-size: 2rem; }
+      .t-sub  { font-size: .95rem; }
+      .sw-box { padding: 32px 28px; }
+      .end-wrap { padding: 18px 24px; }
+      .end-title { font-size: 2.2rem; }
+      .end-msg { font-size: .96rem; }
+      #dbox { height: 215px; }
+      #tap-overlay { bottom: 215px; }
+      #dtxt { font-size: 1.05rem; }
+    }
+
+    /* very small phones */
+    @media (max-width: 380px) {
+      .t-name { font-size: 2.4rem; }
+      #char { font-size: 5rem; }
+      #dbox { height: 230px; padding: 12px 18px 10px; }
+      #tap-overlay { bottom: 230px; }
+      #dtxt { font-size: .98rem; line-height: 1.65; }
+    }
+  </style>
+</head>
+<body>
+<div id="game">
+  <div id="fadelay"></div>
+
+  <!-- ══ TITLE ══════════════════════════════════ -->
+  <div id="title" class="screen">
+    <div class="fdeco" style="top:7%;left:7%;--d:5s;--del:0s">🌸</div>
+    <div class="fdeco" style="top:11%;right:11%;--d:6.2s;--del:.7s">🌷</div>
+    <div class="fdeco" style="bottom:16%;left:5%;--d:7s;--del:1.4s">✨</div>
+    <div class="fdeco" style="bottom:20%;right:8%;--d:5.5s;--del:.3s">💫</div>
+    <div class="fdeco" style="top:44%;left:3%;--d:6.5s;--del:2s">🎀</div>
+    <div class="fdeco" style="top:40%;right:3%;--d:5.8s;--del:1s">💝</div>
+    <div class="fdeco" style="bottom:38%;left:18%;--d:4.8s;--del:2.5s">🎂</div>
+    <div class="fdeco" style="top:28%;left:22%;--d:6s;--del:3s">🩷</div>
+    <p class="t-main">Happy Birthday,</p>
+    <p class="t-name">Mariam 🌸</p>
+    <p class="t-sub">A story of your special day,<br>seen through two hearts</p>
+    <button class="btn" onclick="G.start()">Begin the Story ✨</button>
+  </div>
+
+  <!-- ══ GAME ════════════════════════════════════ -->
+  <div id="gs" class="screen">
+    <div id="scenebg" class="bg-bedroom"></div>
+    <div id="povtag" class="tag-her">🌸 Her Story</div>
+    <button id="skipbtn" onclick="G.skipToEnd()">Skip ▶▶</button>
+    <div id="dots">
+      <div class="dot lit" id="d0"></div>
+      <div class="dot"     id="d1"></div>
+      <div class="dot"     id="d2"></div>
+      <div class="dot"     id="d3"></div>
+    </div>
+    <div id="char">👩‍⚕️</div>
+    <!-- tap anywhere above dialogue to advance -->
+    <div id="tap-overlay" onclick="G.tap()"></div>
+    <div id="dbox" onclick="G.tap()">
+      <span id="spk" class="sk-narr">Narrator</span>
+      <div id="dtxt"></div>
+      <div id="caret">▼</div>
+    </div>
+  </div>
+
+  <!-- ══ POV SWITCH ══════════════════════════════ -->
+  <div id="swscreen" class="screen">
+    <div class="sw-box">
+      <div class="sw-eye"   id="sw-eye"></div>
+      <div class="sw-title" id="sw-title"></div>
+      <div class="sw-sub"   id="sw-sub"></div>
+      <button class="btn-sw" onclick="G.swContinue()">Continue ▶</button>
+    </div>
+  </div>
+
+  <!-- ══ ENDING ══════════════════════════════════ -->
+  <div id="ending" class="screen">
+    <div class="end-wrap">
+      <div class="end-icon">🎂</div>
+      <div class="end-title">Happy Birthday,<br>Mariam</div>
+      <div class="end-msg">
+        You carry the weight of others' pain<br>
+        with a smile that lights up every room.<br>
+        You are everything soft and strong at once —<br>
+        caring, kind, a little sassy, and entirely wonderful.<br>
+        Today, this day, belongs to you. 💕
+      </div>
+      <div class="end-sig">— With all my love, Waqar 🌸</div>
+      <button class="btn-replay" onclick="location.reload()">Play Again 🌸</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+//  STORY
+// ═══════════════════════════════════════════════════════════
+const STORY = [
+  // ── ACT 1 : HER MORNING ────────────────────────────────
+  { pov:'her', bg:'bg-bedroom', ch:'😴', spk:'Narrator', lines:[
+    'The morning light crept through soft curtains, painting the room in the gentlest shade of rose...',
+    'In a quiet room that smelled faintly of chamomile and warmth, something wonderful was stirring.',
+  ]},
+  { pov:'her', bg:'bg-bedroom', ch:'👩', spk:'Mariam', lines:[
+    '* yawns softly *   Mm... five more minutes...',
+    '...Wait.',
+    '🎂  Today is my birthday!',
+  ]},
+  { pov:'her', bg:'bg-bedroom', ch:'👩', spk:'Narrator', lines:[
+    'She sat up, heart a little lighter than usual — that rare, buoyant feeling you only get once a year.',
+    "It was going to be a hospital day. Scrubs, rounds, paperwork. But somehow, that didn't dim the glow.",
+    "Because Mariam had a quiet kind of magic: she could find warmth in the most ordinary of days.",
+  ]},
+
+  // ── HOSPITAL ─────────────────────────────────────────
+  { pov:'her', bg:'bg-hospital', ch:'👩‍⚕️', spk:'Narrator', lines:[
+    'She arrived at the hospital, white coat crisp, stethoscope swinging gently.',
+    'The corridors hummed with their usual rhythm — hurried footsteps, distant monitors, the clatter of trolleys.',
+    'She was a House Officer. Young, but already steady in ways that surprised people twice her age.',
+  ]},
+  { pov:'her', bg:'bg-hospital', ch:'👩‍⚕️', spk:'Mariam', lines:[
+    'Good morning! How are you feeling today?',
+  ]},
+  { pov:'her', bg:'bg-hospital', ch:'🧓', spk:'Patient', lines:[
+    'Better, doctor. You always make the rounds feel less frightening.',
+    '...Is today a special day for you? You seem extra bright.',
+  ]},
+  { pov:'her', bg:'bg-hospital', ch:'👩‍⚕️', spk:'Mariam', lines:[
+    '* smiles softly *   Maybe it is. But today I\'m here for you. 💕',
+  ]},
+  { pov:'her', bg:'bg-hospital', ch:'👩‍⚕️', spk:'Narrator', lines:[
+    'That was Mariam — all warmth and quiet care, even on her own birthday.',
+    "Somewhere between rounds and paperwork, she'd sneak a glance at her phone.",
+    "And there would be that private little smile — the kind that means someone is thinking of you.",
+  ]},
+
+  // ── POV SWITCH → HIS ─────────────────────────────────
+  { pov:'switch', switchTo:'his',
+    eye:'Meanwhile…', title:'His Story',
+    sub:'On the other side of the city, someone else was already awake.' },
+
+  // ── ACT 2 : HIS POV ──────────────────────────────────
+  { pov:'his', bg:'bg-home', ch:'🧑', spk:'Narrator', lines:[
+    'Waqar had been awake for a while.',
+    'Not because of the sun — but because his mind kept circling back to one person.',
+    'Mariam.',
+  ]},
+  { pov:'his', bg:'bg-home', ch:'🧑', spk:'Waqar', lines:[
+    'She\'s probably already at the hospital right now...',
+    'Caring for everyone else. Not even thinking about herself.',
+    'That\'s just who she is.',
+  ]},
+  { pov:'his', bg:'bg-home', ch:'🧑', spk:'Narrator', lines:[
+    'He thought about what to do. Not grand gestures — just something honest.',
+    'Something that said: I see you. I know you. I\'m glad you exist.',
+    'He began to plan.',
+  ]},
+  { pov:'his', bg:'bg-home', ch:'🧑', spk:'Narrator', lines:[
+    'He thought of all the small things he loved about her.',
+    'The way her eyes lit up when she talked about something she cared about.',
+    'Her warmth — the kind you feel before you even notice it.',
+    'And the sassiness. That unpredictable flash that always made him smile.',
+  ]},
+  { pov:'his', bg:'bg-home', ch:'🧑', spk:'Waqar', lines:[
+    'She deserves to feel as special as she makes everyone around her feel.',
+    'Today — that\'s my job.',
+    '* checks the time *   Okay. I have a few hours. Let\'s make this count. 🌸',
+  ]},
+
+  // ── POV SWITCH → HER ─────────────────────────────────
+  { pov:'switch', switchTo:'her',
+    eye:'Back to Mariam…', title:'Her Story',
+    sub:'The shift is winding down. The best part of the day is still ahead.' },
+
+  // ── ACT 3 : TOGETHER ─────────────────────────────────
+  { pov:'her', bg:'bg-hospital', ch:'👩‍⚕️', spk:'Narrator', lines:[
+    'The shift wound down the way all long days do — slowly, then all at once.',
+    'Mariam signed off her last note, stretched her neck, and exhaled.',
+  ]},
+  { pov:'her', bg:'bg-hospital', ch:'👩‍⚕️', spk:'Mariam', lines:[
+    '* sighs softly *   What a day.',
+    'I\'m tired... but the good kind.',
+  ]},
+  { pov:'both', bg:'bg-evening', ch:'👩', spk:'Narrator', lines:[
+    'And then she arrived — to something she hadn\'t expected.',
+    'Something that felt, somehow, exactly right.',
+  ]},
+  { pov:'both', bg:'bg-evening', ch:'👩', spk:'Mariam', lines:[
+    'You... you did all of this?',
+  ]},
+  { pov:'both', bg:'bg-evening', ch:'🧑', spk:'Waqar', lines:[
+    'You spend every day taking care of everyone else.',
+    'Tonight, someone takes care of you.',
+    'Happy Birthday, Mariam. 🌸',
+  ]},
+  { pov:'both', bg:'bg-evening', ch:'👩', spk:'Mariam', lines:[
+    '* laughs softly, eyes glistening *',
+    'You\'re such an idiot.',
+    '... Thank you. Really. 💕',
+  ]},
+  { pov:'both', bg:'bg-evening', ch:'🥂', spk:'Narrator', lines:[
+    'And in that moment — between her laugh and his smile — the whole day came together.',
+    'Two people. One day. Two stories that were always really just one.',
+  ]},
+
+  // ── ENDING ───────────────────────────────────────────
+  { pov:'ending' },
+];
+
+// ═══════════════════════════════════════════════════════════
+//  ENGINE
+// ═══════════════════════════════════════════════════════════
+const G = (() => {
+  let si = 0, li = 0, typing = false, timer = null;
+
+  const el = id => document.getElementById(id);
+  const SCR = {
+    title:    el('title'),
+    gs:       el('gs'),
+    swscreen: el('swscreen'),
+    ending:   el('ending'),
+  };
+  const fadeEl   = el('fadelay');
+  const scenebg  = el('scenebg');
+  const povtag   = el('povtag');
+  const charEl   = el('char');
+  const spkEl    = el('spk');
+  const dtxtEl   = el('dtxt');
+
+  // ── helpers ──────────────────────────────────────────
+  function show(key) {
+    Object.values(SCR).forEach(s => { s.style.display = 'none'; s.classList.remove('active'); });
+    const s = SCR[key];
+    s.style.display = 'flex';
+    s.classList.add('active');
+  }
+
+  function fade(cb) {
+    fadeEl.classList.add('on');
+    setTimeout(() => { cb(); setTimeout(() => fadeEl.classList.remove('on'), 80); }, 560);
+  }
+
+  function dots(idx) {
+    const real = STORY.filter(s => s.pov !== 'switch' && s.pov !== 'ending');
+    const done = STORY.slice(0, idx + 1).filter(s => s.pov !== 'switch' && s.pov !== 'ending').length;
+    const prog = Math.ceil((done / real.length) * 4);
+    for (let i = 0; i < 4; i++) {
+      const d = el('d' + i);
+      if (d) d.className = 'dot' + (i < prog ? ' lit' : '');
+    }
+  }
+
+  function setPov(pov) {
+    const map = {
+      her:  { text:'🌸 Her Story',   cls:'tag-her'  },
+      his:  { text:'💙 His Story',   cls:'tag-his'  },
+      both: { text:'💕 Their Story', cls:'tag-both' },
+    };
+    const c = map[pov] || map.her;
+    povtag.className = c.cls;
+    povtag.textContent = c.text;
+  }
+
+  function spkClass(name, pov) {
+    if (name === 'Narrator')                   return 'sk-narr';
+    if (name === 'Waqar' || pov === 'his')    return 'sk-his';
+    if (name === 'Patient')                    return 'sk-npc';
+    return 'sk-her';
+  }
+
+  function typewrite(text) {
+    dtxtEl.textContent = ''; typing = true; let i = 0;
+    function step() {
+      if (i < text.length) { dtxtEl.textContent += text[i++]; timer = setTimeout(step, 27); }
+      else typing = false;
+    }
+    step();
+  }
+
+  // ── render ───────────────────────────────────────────
+  function render(idx) {
+    const s = STORY[idx];
+    if (!s) { fade(ending); return; }
+    if (s.pov === 'switch') { fade(() => doSwitch(s)); return; }
+    if (s.pov === 'ending') { fade(ending);            return; }
+
+    li = 0;
+    scenebg.className = s.bg;
+    charEl.textContent = s.ch;
+    setPov(s.pov);
+    spkEl.className = spkClass(s.spk, s.pov);
+    spkEl.textContent = s.spk;
+    dots(idx);
+    typewrite(s.lines[0]);
+  }
+
+  // ── tap / advance ─────────────────────────────────────
+  function tap() {
+    if (typing) {
+      clearTimeout(timer);
+      dtxtEl.textContent = STORY[si].lines[li];
+      typing = false;
+      return;
+    }
+    li++;
+    const s = STORY[si];
+    if (li < s.lines.length) {
+      typewrite(s.lines[li]);
+    } else {
+      si++;
+      fade(() => render(si));
+    }
+  }
+
+  // ── pov switch screen ────────────────────────────────
+  function doSwitch(s) {
+    el('sw-eye').textContent   = s.eye;
+    el('sw-title').textContent = s.title;
+    el('sw-sub').textContent   = s.sub;
+
+    SCR.swscreen.style.background = s.switchTo === 'his'
+      ? 'linear-gradient(135deg,#C0D2E5 0%,#D8C5EE 50%,#C5B8E5 100%)'
+      : 'linear-gradient(135deg,#FFD2E5 0%,#FFE5D5 50%,#FFD5E5 100%)';
+
+    show('swscreen');
+  }
+
+  function swContinue() {
+    si++;
+    fade(() => { show('gs'); render(si); });
+  }
+
+  // ── ending ────────────────────────────────────────────
+  function ending() {
+    show('ending');
+    const icons = ['💕','🌸','✨','💝','🌷','💫','🎂','🎀','🩷','🌺'];
+    const endEl = SCR.ending;
+    const go = () => {
+      const f = document.createElement('div');
+      f.className = 'floaty';
+      f.textContent = icons[Math.floor(Math.random() * icons.length)];
+      f.style.left = (Math.random() * 92) + '%';
+      f.style.bottom = '-40px';
+      f.style.setProperty('--d', (3.5 + Math.random() * 3) + 's');
+      f.style.setProperty('--del', (Math.random() * 1.2) + 's');
+      f.style.fontSize = (1.2 + Math.random() * 1.4) + 'rem';
+      endEl.appendChild(f);
+      setTimeout(() => f.remove(), 7500);
+    };
+    const iv = setInterval(go, 360);
+    setTimeout(() => clearInterval(iv), 10000);
+  }
+
+  // ── skip ──────────────────────────────────────────────
+  function skipToEnd() {
+    clearTimeout(timer);
+    typing = false;
+    si = STORY.length - 1;
+    fade(ending);
+  }
+
+  // ── init ──────────────────────────────────────────────
+  function start() {
+    fade(() => { show('gs'); render(0); });
+  }
+
+  return { start, tap, swContinue, skipToEnd };
+})();
+</script>
+</body>
+</html>
