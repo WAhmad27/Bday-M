@@ -340,6 +340,24 @@
       cursor: pointer;
     }
 
+    /* ── PHOTO SCENE ───────────────────────────── */
+    #scenebg.bg-photo {
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      transition: opacity .8s ease;
+    }
+    #scenebg.bg-photo::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse at center, transparent 35%, rgba(0,0,0,.28) 100%),
+        linear-gradient(to bottom, rgba(0,0,0,.08) 0%, transparent 45%, rgba(0,0,0,.15) 100%);
+      pointer-events: none;
+      z-index: 1;
+    }
+
     /* ── STORY SELECT ──────────────────────────── */
     #sel {
       flex-direction: column;
@@ -624,24 +642,24 @@ const SHORT_STORY = [
     '* sighs softly *   What a day.',
     'I\'m tired... but the good kind.',
   ]},
-  { pov:'both', bg:'bg-evening', ch:'👩', spk:'Narrator', lines:[
+  { pov:'both', bg:'bg-evening', img:'Assets/Birthday Celebration.jfif', ch:'', spk:'Narrator', lines:[
     'And then she arrived — to something she hadn\'t expected.',
     'Something that felt, somehow, exactly right.',
   ]},
-  { pov:'both', bg:'bg-evening', ch:'👩', spk:'Mariam', lines:[
+  { pov:'both', bg:'bg-evening', img:'Assets/Birthday Celebration.jfif', ch:'', spk:'Mariam', lines:[
     'You... you did all of this?',
   ]},
-  { pov:'both', bg:'bg-evening', ch:'🧑', spk:'Waqar', lines:[
+  { pov:'both', bg:'bg-evening', img:'Assets/Birthday Celebration.jfif', ch:'', spk:'Waqar', lines:[
     'You spend every day taking care of everyone else.',
     'Tonight, someone takes care of you.',
     'Happy Birthday, Mariam. 🌸',
   ]},
-  { pov:'both', bg:'bg-evening', ch:'👩', spk:'Mariam', lines:[
+  { pov:'both', bg:'bg-evening', img:'Assets/Birthday Celebration.jfif', ch:'', spk:'Mariam', lines:[
     '* laughs softly, eyes glistening *',
     'You\'re such an idiot.',
     '... Thank you. Really. 💕',
   ]},
-  { pov:'both', bg:'bg-evening', ch:'🥂', spk:'Narrator', lines:[
+  { pov:'both', bg:'bg-evening', img:'Assets/Birthday Celebration.jfif', ch:'', spk:'Narrator', lines:[
     'And in that moment — between her laugh and his smile — the whole day came together.',
     'Two people. One day. Two stories that were always really just one.',
   ]},
@@ -736,7 +754,15 @@ const G = (() => {
     if (s.pov === 'ending') { fade(ending);            return; }
 
     li = 0;
-    scenebg.className = s.bg;
+    if (s.img) {
+      scenebg.className = 'bg-photo';
+      scenebg.style.backgroundImage = `url("${s.img}")`;
+      charEl.style.opacity = '0';
+    } else {
+      scenebg.className = s.bg;
+      scenebg.style.backgroundImage = '';
+      charEl.style.opacity = '1';
+    }
     charEl.textContent = s.ch;
     setPov(s.pov);
     spkEl.className = spkClass(s.spk, s.pov);
