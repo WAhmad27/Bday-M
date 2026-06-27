@@ -255,6 +255,24 @@
     }
     #skipbtn:hover { background: rgba(255,255,255,.7); }
 
+    /* MUTE BUTTON */
+    #mutebtn {
+      position: absolute;
+      top: 14px; right: 70px;
+      width: 28px; height: 28px;
+      background: rgba(255,255,255,.4);
+      border: 1px solid rgba(200,150,190,.4);
+      border-radius: 50%;
+      font-size: .85rem; color: #8a4a6a;
+      cursor: pointer; z-index: 250;
+      backdrop-filter: blur(4px);
+      transition: background .2s, color .2s;
+      display: flex; align-items: center; justify-content: center;
+      padding: 0;
+    }
+    #mutebtn:hover  { background: rgba(255,255,255,.7); }
+    #mutebtn.muted  { color: #bbb; }
+
     /* ── POV SWITCH ─────────────────────────────── */
     #swscreen {
       flex-direction: column;
@@ -515,6 +533,7 @@
 <body>
 <div id="game">
   <div id="fadelay"></div>
+  <button id="mutebtn" onclick="G.toggleMute()" title="Toggle music">♪</button>
 
   <!-- ══ TITLE ══════════════════════════════════ -->
   <div id="title" class="screen">
@@ -740,6 +759,99 @@ const LONG_STORY = [
 ];
 
 // ═══════════════════════════════════════════════════════════
+//  AUDIO ENGINE  (Web Audio API — no external files needed)
+// ═══════════════════════════════════════════════════════════
+// Each track is a soft ambient chord pad built from sine oscillators.
+// Slightly detuned pairs per note create natural warmth/beats.
+const Audio = (() => {
+  let ctx = null, master = null, current = null;
+  let muted = false, currentKey = null;
+
+  function init() {
+    if (ctx) return;
+    ctx = new (window.AudioContext || window.webkitAudioContext)();
+    master = ctx.createGain();
+    master.gain.value = 0.32;
+    master.connect(ctx.destination);
+  }
+
+  // Build a pad from an array of Hz values with a low-pass filter cutoff
+  function makePad(freqs, cut) {
+    const out = ctx.createGain();
+    out.gain.setValueAtTime(0, ctx.currentTime);
+    out.gain.linearRampToValueAtTime(1, ctx.currentTime + 2.8);
+
+    freqs.forEach(f => {
+      [[1, 0.55, 'sine'], [1.0015, 0.25, 'triangle'], [0.9988, 0.2, 'triangle']]
+        .forEach(([det, vol, type]) => {
+          const osc = ctx.createOscillator();
+          osc.type = type;
+          osc.frequency.value = f * det;
+
+          const g = ctx.createGain();
+          g.gain.value = vol;
+
+          const flt = ctx.createBiquadFilter();
+          flt.type = 'lowpass';
+          flt.frequency.value = cut;
+          flt.Q.value = 0.7;
+
+          osc.connect(g); g.connect(flt); flt.connect(out);
+          osc.start();
+        });
+    });
+
+    out.connect(master);
+    return out;
+  }
+
+  // Chord definitions per scene mood
+  // freqs = root + harmonics in Hz, cut = low-pass cutoff
+  const TRACKS = {
+    title:    { freqs: [130.81, 261.63, 329.63, 392.00], cut: 1100 }, // C maj — bright, celebratory
+    bedroom:  { freqs: [98.00,  196.00, 246.94, 293.66], cut:  640 }, // G maj — soft, morning
+    hospital: { freqs: [110.00, 220.00, 261.63, 329.63], cut:  820 }, // A min — calm, steady
+    home:     { freqs: [87.31,  174.61, 220.00, 261.63], cut:  950 }, // F maj — warm, thoughtful
+    evening:  { freqs: [73.42,  146.83, 185.00, 220.00], cut:  700 }, // D maj — romantic, glowing
+    ending:   { freqs: [261.63, 329.63, 392.00, 493.88], cut: 1400 }, // C maj7 — warm, joyful
+  };
+
+  let prevOut = null;
+
+  function _swap(key) {
+    if (prevOut) {
+      const old = prevOut;
+      old.gain.linearRampToValueAtTime(0, ctx.currentTime + 1.6);
+      setTimeout(() => old.disconnect(), 1800);
+    }
+    const t = TRACKS[key];
+    prevOut = t ? makePad(t.freqs, t.cut) : null;
+  }
+
+  function play(key) {
+    if (key === currentKey) return;
+    currentKey = key;
+    if (!ctx) init();
+    if (ctx.state === 'suspended') ctx.resume();
+    if (!muted) _swap(key);
+  }
+
+  function toggleMute() {
+    if (!ctx) init();
+    muted = !muted;
+    if (muted) {
+      master.gain.linearRampToValueAtTime(0, ctx.currentTime + 0.5);
+    } else {
+      master.gain.linearRampToValueAtTime(0.32, ctx.currentTime + 0.5);
+      if (currentKey) _swap(currentKey);
+    }
+    return muted;
+  }
+
+  return { play, toggleMute };
+})();
+
+// ═══════════════════════════════════════════════════════════
 //  ENGINE
 // ═══════════════════════════════════════════════════════════
 const G = (() => {
@@ -812,6 +924,13 @@ const G = (() => {
     step();
   }
 
+  const BG_TRACK = {
+    'bg-bedroom':  'bedroom',
+    'bg-hospital': 'hospital',
+    'bg-home':     'home',
+    'bg-evening':  'evening',
+  };
+
   const CHAR_IMGS = {
     '👩🏻':    'Assets/Mariam.jfif',
     '👩🏻‍⚕️': 'Assets/Mariam_hospital.jfif',
@@ -843,6 +962,8 @@ const G = (() => {
       charEl.textContent = s.ch;
       charEl.style.fontSize = '';
     }
+    const track = BG_TRACK[s.bg];
+    if (track) Audio.play(track);
     setPov(s.pov);
     spkEl.className = spkClass(s.spk, s.pov);
     spkEl.textContent = s.spk;
@@ -888,6 +1009,7 @@ const G = (() => {
 
   // ── ending ────────────────────────────────────────────
   function ending() {
+    Audio.play('ending');
     show('ending');
     const icons = ['💕','🌸','✨','💝','🌷','💫','🎂','🎀','🩷','🌺'];
     const endEl = SCR.ending;
@@ -917,14 +1039,17 @@ const G = (() => {
 
   // ── navigation ────────────────────────────────────────
   function goSelect() {
+    Audio.play('title');
     fade(() => show('sel'));
   }
 
   function backToTitle() {
+    Audio.play('title');
     fade(() => show('title'));
   }
 
   function backToSelect() {
+    Audio.play('title');
     fade(() => show('sel'));
   }
 
@@ -939,7 +1064,14 @@ const G = (() => {
     fade(() => { show('gs'); render(0); });
   }
 
-  return { goSelect, backToTitle, backToSelect, showUnderDev, pickStory, tap, swContinue, skipToEnd };
+  function toggleMute() {
+    const nowMuted = Audio.toggleMute();
+    const btn = el('mutebtn');
+    btn.textContent = nowMuted ? '♪̶' : '♪';
+    btn.classList.toggle('muted', nowMuted);
+  }
+
+  return { goSelect, backToTitle, backToSelect, showUnderDev, pickStory, tap, swContinue, skipToEnd, toggleMute };
 })();
 </script>
 </body>
