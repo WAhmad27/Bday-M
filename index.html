@@ -189,6 +189,13 @@
       transition: opacity .4s, font-size .3s;
       user-select: none;
     }
+    #char img {
+      display: block;
+      height: 310px;
+      max-width: 250px;
+      object-fit: contain;
+      object-position: bottom center;
+    }
     @keyframes bth {
       0%,100% { transform: translateX(-50%) scale(1)      translateY(0);   }
       50%      { transform: translateX(-50%) scale(1.038) translateY(-5px); }
@@ -478,6 +485,7 @@
         border-radius: 0;
       }
       #char { font-size: 6rem; bottom: 215px; }
+      #char img { height: 255px; max-width: 200px; }
       .t-name { font-size: 2.9rem; }
       .t-main { font-size: 2rem; }
       .t-sub  { font-size: .95rem; }
@@ -497,6 +505,7 @@
     @media (max-width: 380px) {
       .t-name { font-size: 2.4rem; }
       #char { font-size: 5rem; }
+      #char img { height: 210px; max-width: 170px; }
       #dbox { height: 230px; padding: 12px 18px 10px; }
       #tap-overlay { bottom: 230px; }
       #dtxt { font-size: .98rem; line-height: 1.65; }
@@ -803,6 +812,11 @@ const G = (() => {
     step();
   }
 
+  const CHAR_IMGS = {
+    '👩🏻':    'Assets/Mariam.jfif',
+    '👩🏻‍⚕️': 'Assets/Mariam_hospital.jfif',
+  };
+
   // ── render ───────────────────────────────────────────
   function render(idx) {
     const s = activeStory[idx];
@@ -820,7 +834,14 @@ const G = (() => {
       scenebg.style.backgroundImage = '';
       charEl.style.opacity = '1';
     }
-    charEl.textContent = s.ch;
+    const imgSrc = CHAR_IMGS[s.ch];
+    if (imgSrc) {
+      charEl.innerHTML = `<img src="${imgSrc}" alt="">`;
+      charEl.style.fontSize = '0';
+    } else {
+      charEl.textContent = s.ch;
+      charEl.style.fontSize = '';
+    }
     setPov(s.pov);
     spkEl.className = spkClass(s.spk, s.pov);
     spkEl.textContent = s.spk;
